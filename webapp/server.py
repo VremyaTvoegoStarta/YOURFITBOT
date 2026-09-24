@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import date, timedelta
 
 import httpx
@@ -14,6 +15,10 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 TRAINER_TG_ID = int(os.getenv("TRAINER_TG_ID", "0"))
 TRAINER_USERNAME = os.getenv("TRAINER_USERNAME", "")
 
+# Меняется при каждом запуске сервера (=при каждом деплое), чтобы Telegram
+# не показывал закэшированную старую версию JS/CSS мини-приложения.
+BUILD_VERSION = str(int(time.time()))
+
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
 
@@ -22,7 +27,8 @@ HERE = os.path.dirname(__file__)
 
 def read_template(name: str) -> str:
     with open(os.path.join(HERE, "templates", name), encoding="utf-8") as f:
-        return f.read()
+        html = f.read()
+    return html.replace("{{VERSION}}", BUILD_VERSION)
 
 
 def current_tg_id(request: Request) -> int:
@@ -49,12 +55,12 @@ def monday_of(d: date) -> date:
 
 @app.get("/client", response_class=HTMLResponse)
 async def client_page():
-    return read_template("client.html")
+    return HTMLResponse(read_template("client.html"), headers={"Cache-Control": "no-store"})
 
 
 @app.get("/trainer", response_class=HTMLResponse)
 async def trainer_page():
-    return read_template("trainer.html")
+    return HTMLResponse(read_template("trainer.html"), headers={"Cache-Control": "no-store"})
 
 
 @app.get("/", response_class=HTMLResponse)
