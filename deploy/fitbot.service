@@ -1,0 +1,15 @@
+[Unit]
+Description=FitBot - Telegram bot and web app
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/fitbot
+EnvironmentFile=/home/ubuntu/fitbot/.env
+ExecStart=/home/ubuntu/fitbot/venv/bin/python /home/ubuntu/fitbot/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=ngrok tunnel for FitBot
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+ExecStart=/usr/local/bin/ngrok http 8080 --domain=YOUR-STATIC-DOMAIN.ngrok-free.app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

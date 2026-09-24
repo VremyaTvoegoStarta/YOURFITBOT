@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Кабинет тренера</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="kicker">Кабинет тренера</div>
+    <h1>Клиенты и программы</h1>
+  </div>
+
+  <section class="section active" id="tab-clients">
+    <div id="clientsList" class="card"><div class="empty">Загрузка…</div></div>
+  </section>
+
+  <section class="section" id="tab-builder">
+    <div class="card">
+      <div class="field">
+        <label>Клиент</label>
+        <select id="clientSelect"></select>
+      </div>
+      <div class="field">
+        <label>Начало недели</label>
+        <input type="date" id="weekStart">
+      </div>
+    </div>
+
+    <div class="day-picker" id="dayPicker"></div>
+
+    <div class="card">
+      <div id="selectedDayItems"></div>
+      <div class="chip-row" id="exerciseChips"></div>
+      <p style="color:var(--ink-soft);font-size:12px;margin:0 0 10px;">
+        Отмечено ⭐ — то, что этому клиенту давно не давали или не давали ни разу.
+      </p>
+      <button class="btn secondary" onclick="addSelectedExercise()">Добавить в день</button>
+    </div>
+
+    <button class="btn" onclick="savePlan()">Сохранить программу</button>
+  </section>
+
+  <section class="section" id="tab-library">
+    <div class="card">
+      <p style="color:var(--ink-soft);font-size:13.5px;line-height:1.5;margin:0;">
+        Чтобы добавить видео в библиотеку — отправьте его прямо в чат с ботом.
+        В подписи укажите название, а через «|» — теги, например:<br>
+        <b>Присед со штангой | ноги, база</b>
+      </p>
+    </div>
+    <div id="libraryList"></div>
+  </section>
+
+  <section class="section" id="tab-client-detail">
+    <button class="btn secondary" style="margin-bottom:12px;" onclick="showTab('tab-clients', document.querySelector('[data-tab=tab-clients]'))">← Назад к клиентам</button>
+    <h2 id="detailName" style="padding:0 0 10px 2px;"></h2>
+    <h3 style="padding:0 0 6px 2px;font-size:14px;color:var(--ink-soft);">Вес</h3>
+    <div id="detailWeight" class="card"></div>
+    <h3 style="padding:14px 0 6px 2px;font-size:14px;color:var(--ink-soft);">Питание</h3>
+    <div id="detailNutrition" class="card"></div>
+  </section>
+</div>
+
+<div class="tabbar">
+  <button class="tab-btn active" data-tab="tab-clients" onclick="showTab('tab-clients', this)"><span class="icon">👥</span>Клиенты</button>
+  <button class="tab-btn" data-tab="tab-builder" onclick="showTab('tab-builder', this)"><span class="icon">🗓</span>Программа</button>
+  <button class="tab-btn" data-tab="tab-library" onclick="showTab('tab-library', this)"><span class="icon">🎬</span>Видео</button>
+</div>
+
+<script src="/static/trainer.js"></script>
+</body>
+</html>
