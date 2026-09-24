@@ -1,6 +1,15 @@
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+let tg;
+if (window.Telegram && window.Telegram.WebApp) {
+  tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+} else {
+  document.body.innerHTML = `<div style="padding:24px;font-family:sans-serif;">
+    Не удалось загрузить Telegram WebApp SDK. Откройте это приложение только
+    через кнопку в боте Telegram, не по прямой ссылке в браузере.
+  </div>`;
+  throw new Error("Telegram WebApp SDK not available");
+}
 
 const INIT_DATA = tg.initData || "";
 const DAY_NAMES = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
@@ -14,7 +23,12 @@ async function api(path, options = {}) {
       ...(options.headers || {}),
     },
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    const err = new Error(`${res.status}: ${text || res.statusText}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
@@ -37,7 +51,7 @@ async function loadMe() {
     document.getElementById("userName").textContent = me.name || "Без имени";
     document.getElementById("greeting").textContent = me.goal ? `Цель: ${me.goal}` : "Личный кабинет";
   } catch (e) {
-    document.getElementById("userName").textContent = "Отправьте /start боту";
+    document.getElementById("userName").textContent = `Ошибка (${e.message})`;
   }
 }
 

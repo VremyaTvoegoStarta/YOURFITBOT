@@ -1,6 +1,15 @@
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+let tg;
+if (window.Telegram && window.Telegram.WebApp) {
+  tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+} else {
+  document.body.innerHTML = `<div style="padding:24px;font-family:sans-serif;">
+    Не удалось загрузить Telegram WebApp SDK. Откройте это приложение только
+    через кнопку в боте Telegram, не по прямой ссылке в браузере.
+  </div>`;
+  throw new Error("Telegram WebApp SDK not available");
+}
 
 const INIT_DATA = tg.initData || "";
 const DAY_NAMES = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
@@ -20,7 +29,12 @@ async function api(path, options = {}) {
       ...(options.headers || {}),
     },
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    const err = new Error(`${res.status}: ${text || res.statusText}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
@@ -47,8 +61,13 @@ function mondayISO(d = new Date()) {
 // ---------- клиенты ----------
 
 async function loadClients() {
-  clients = await api("/api/trainer/clients");
   const list = document.getElementById("clientsList");
+  try {
+    clients = await api("/api/trainer/clients");
+  } catch (e) {
+    list.innerHTML = `<div class="empty">Не удалось загрузить клиентов (${esc(e.message)}).<br>Если это 401 — не открыт как WebApp кнопка бота. Если 403 — TRAINER_TG_ID не совпадает.</div>`;
+    return;
+  }
   list.outerHTML = clients.length
     ? clients.map(c => `
         <div class="client-row" onclick="openClientDetail(${c.tg_id})" style="cursor:pointer;">
@@ -191,8 +210,15 @@ async function savePlan() {
 // ---------- библиотека видео ----------
 
 async function loadLibrary() {
-  const list = await api("/api/trainer/exercises");
-  document.getElementById("libraryList").innerHTML = list.length
+  const el = document.getElementById("libraryList");
+  let list;
+  try {
+    list = await api("/api/trainer/exercises");
+  } catch (e) {
+    el.innerHTML = `<div class="empty">Не удалось загрузить библиотеку (${esc(e.message)})</div>`;
+    return;
+  }
+  el.innerHTML = list.length
     ? list.map(e => `
         <div class="exercise-item card">
           <div>
