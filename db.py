@@ -3,12 +3,16 @@
 База — обычный файл SQLite (fitbot.db), создаётся автоматически при первом запуске.
 """
 
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, date
 from typing import Optional
 
-DB_PATH = "fitbot.db"
+# Путь к файлу базы. На Railway задайте переменную DB_PATH=/data/fitbot.db
+# и примонтируйте Volume именно на /data (НЕ на /app!) — иначе том сотрёт код.
+DB_PATH = os.getenv("DB_PATH", "fitbot.db")
+os.makedirs(os.path.dirname(DB_PATH) or ".", exist_ok=True)
 
 
 @contextmanager
